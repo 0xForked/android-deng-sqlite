@@ -19,6 +19,7 @@ import static id.bakode.local.DatabaseConstant.*;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private SQLiteDatabase mDatabase;
+    private ContentValues mContentValue;
 
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + TABLE_NAME + " (" +
@@ -51,10 +52,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    void storeData(String post) {
+    void storeData(String body) {
         mDatabase = this.getWritableDatabase();
-        ContentValues mContentValue = new ContentValues();
-        mContentValue.put(COLUMN_NAME_BODY, post);
+        mContentValue = new ContentValues();
+        mContentValue.put(COLUMN_NAME_BODY, body);
         mDatabase.insert(TABLE_NAME, null, mContentValue);
         mDatabase.close();
     }
@@ -77,6 +78,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             mDatabase.close();
         }
         return mPostData;
+    }
+
+    void updateData(int id, String body) {
+        mDatabase = this.getWritableDatabase();
+        mContentValue = new ContentValues();
+        mContentValue.put(COLUMN_NAME_BODY, body);
+        mDatabase.update(
+                TABLE_NAME,
+                mContentValue,
+                COLUMN_NAME_ID + "= ?",
+                new String[]{String.valueOf(id)}
+        );
+        mDatabase.close();
     }
 
     void destroyData(Post post) {
