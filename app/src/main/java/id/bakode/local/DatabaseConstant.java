@@ -17,4 +17,15 @@ class DatabaseConstant {
     static final String COLUMN_NAME_ID = "id";
     static final String COLUMN_NAME_BODY = "note";
 
+     static final String SQL_QUERY_CREATE_ENTRIES =
+            "CREATE TABLE " + TABLE_NAME + " (" +
+                    COLUMN_NAME_ID + " INTEGER PRIMARY KEY," +
+                    COLUMN_NAME_BODY + " TEXT)";
+
+     static final String SQL_QUERY_DELETE_ENTRIES =
+            "DROP TABLE IF EXISTS " + TABLE_NAME;
+
+     static final String SQL_QUERY_SELECT_QUERY = "SELECT  * FROM " + TABLE_NAME + " ORDER BY " +
+            COLUMN_NAME_ID+ " DESC";
+
 }

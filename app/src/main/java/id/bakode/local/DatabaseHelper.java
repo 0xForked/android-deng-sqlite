@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
@@ -21,42 +22,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private SQLiteDatabase mDatabase;
     private ContentValues mContentValue;
 
-    private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COLUMN_NAME_ID + " INTEGER PRIMARY KEY," +
-                    COLUMN_NAME_BODY + " TEXT)";
-
-    private static final String SQL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + TABLE_NAME;
-
-    private static final String SQL_SELECT_QUERY = "SELECT  * FROM " + TABLE_NAME + " ORDER BY " +
-            COLUMN_NAME_ID+ " DESC";
-
     DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
+        try {
+            db.execSQL(SQL_QUERY_CREATE_ENTRIES);
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DELETE_ENTRIES);
-        onCreate(db);
+        try {
+            db.execSQL(SQL_QUERY_DELETE_ENTRIES);
+            onCreate(db);
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        onUpgrade(db, oldVersion, newVersion);
+        try {
+            onUpgrade(db, oldVersion, newVersion);
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
     }
 
     void storeData(String body) {
         mDatabase = this.getWritableDatabase();
         mContentValue = new ContentValues();
         mContentValue.put(COLUMN_NAME_BODY, body);
-        mDatabase.insert(TABLE_NAME, null, mContentValue);
+        try {
+            mDatabase.insert(TABLE_NAME, null, mContentValue);
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
         mDatabase.close();
     }
 
@@ -64,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ArrayList<Post> mPostData = new ArrayList<>();
         mDatabase = this.getWritableDatabase();
         @SuppressLint("Recycle")
-        Cursor mCursor = mDatabase.rawQuery(SQL_SELECT_QUERY, null);
+        Cursor mCursor = mDatabase.rawQuery(SQL_QUERY_SELECT_QUERY, null);
         try {
             if (mCursor.moveToFirst()) {
                 do {
@@ -84,22 +90,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         mDatabase = this.getWritableDatabase();
         mContentValue = new ContentValues();
         mContentValue.put(COLUMN_NAME_BODY, body);
-        mDatabase.update(
-                TABLE_NAME,
-                mContentValue,
-                COLUMN_NAME_ID + "= ?",
-                new String[]{String.valueOf(id)}
-        );
+        try {
+            mDatabase.update(
+                    TABLE_NAME,
+                    mContentValue,
+                    COLUMN_NAME_ID + "= ?",
+                    new String[]{String.valueOf(id)}
+            );
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
         mDatabase.close();
     }
 
     void destroyData(Post post) {
         mDatabase = this.getWritableDatabase();
-        mDatabase.delete(
-                TABLE_NAME,
-                COLUMN_NAME_ID + " = ?",
-                new String[]{String.valueOf(post.getId())}
-        );
+        try {
+            mDatabase.delete(
+                    TABLE_NAME,
+                    COLUMN_NAME_ID + " = ?",
+                    new String[]{String.valueOf(post.getId())}
+            );
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
         mDatabase.close();
     }
 
