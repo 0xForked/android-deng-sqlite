@@ -1,6 +1,5 @@
 package id.bakode.local;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -13,7 +12,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -58,12 +56,9 @@ public class MainActivity extends
     }
 
     private void onClickListener() {
-        mCreatePost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showAlertDialog(false, null);
-                Snackbar.make(view, "Add new post", Snackbar.LENGTH_LONG).show();
-            }
+        mCreatePost.setOnClickListener(view -> {
+            showAlertDialog(false, null);
+            Snackbar.make(view, "Add new post", Snackbar.LENGTH_LONG).show();
         });
     }
 
@@ -100,30 +95,23 @@ public class MainActivity extends
 
         alertDialog.setView(mInputBody);
         alertDialog.setPositiveButton((isUpdate) ? "UPDATE" : "CREATE",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        String mBody = mInputBody.getText().toString();
+                (dialog, which) -> {
+                    String mBody = mInputBody.getText().toString();
 
-                        if (isUpdate) {
-                            mPostHelper.updateData(post.getId(), mBody);
-                        } else {
-                            mPostHelper.storeData(mBody);
-                        }
-
-                        refreshList();
-
-                        String mStoreMessage = "new post created with body: ";
-                        String mUpdateMessage = "update post";
-                        showToast((isUpdate) ? mUpdateMessage : mStoreMessage);
+                    if (isUpdate) {
+                        mPostHelper.updateData(post.getId(), mBody);
+                    } else {
+                        mPostHelper.storeData(mBody);
                     }
+
+                    refreshList();
+
+                    String mStoreMessage = "new post created with body: ";
+                    String mUpdateMessage = "update post";
+                    showToast((isUpdate) ? mUpdateMessage : mStoreMessage);
                 });
 
-        alertDialog.setNegativeButton("CANCEL",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
+        alertDialog.setNegativeButton("CANCEL", (dialog, which) -> dialog.cancel());
 
         alertDialog.show();
     }
