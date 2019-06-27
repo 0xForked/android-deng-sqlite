@@ -28,18 +28,8 @@ class PostViewHolder extends RecyclerView.ViewHolder {
 
     void onBind(final Post post, final PostListener listener) {
        mPostBody.setText(post.getBody());
-       mPostContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listener.onClickPost(post);
-            }
-       });
-       mDeletePost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listener.onDeletePost(post);
-            }
-       });
+       mPostContainer.setOnClickListener(v ->  listener.onClickPost(post));
+       mDeletePost.setOnClickListener(v -> listener.onDeletePost(post));
     }
 
 }
