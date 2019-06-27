@@ -70,11 +70,8 @@ public class MainActivity extends
     @Override
     public void onClickPost(Post post) {
         showAlertDialog(true, post);
-        Toast.makeText(
-                this,
-                "post: " + post.getBody() + " edit!",
-                Toast.LENGTH_SHORT
-        ).show();
+        String mEditMessage = "post: " + post.getBody() + " edit!";
+        showToast(mEditMessage);
     }
 
     @Override
