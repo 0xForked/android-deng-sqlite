@@ -19,9 +19,9 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class MainActivity extends
-        AppCompatActivity implements PostAdapter.PostListener {
+        AppCompatActivity implements PostListener {
 
-    private DatabaseHelper mDatabaseHelper;
+    private PostHelper mPostHelper;
 
     private PostAdapter mAdapter;
 
@@ -35,7 +35,8 @@ public class MainActivity extends
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mDatabaseHelper = new DatabaseHelper(this);
+        DatabaseHelper mDatabaseHelper = new DatabaseHelper(this);
+        mPostHelper = new PostHelper(mDatabaseHelper);
 
         initView();
         initRecyclerView();
@@ -48,7 +49,7 @@ public class MainActivity extends
     }
 
     private void initRecyclerView() {
-        mAdapter = new PostAdapter(mDatabaseHelper.getPosts(), this);
+        mAdapter = new PostAdapter(mPostHelper.getPosts(), this);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setHasFixedSize(true);
@@ -60,7 +61,7 @@ public class MainActivity extends
         mCreatePost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                alertDialogNewAction();
+                showAlertDialog(false, null);
                 Snackbar.make(view, "Add new post", Snackbar.LENGTH_LONG).show();
             }
         });
@@ -68,7 +69,7 @@ public class MainActivity extends
 
     @Override
     public void onClickPost(Post post) {
-        alertDialogUpdateAction(post);
+        showAlertDialog(true, post);
         Toast.makeText(
                 this,
                 "post: " + post.getBody() + " edit!",
@@ -78,87 +79,69 @@ public class MainActivity extends
 
     @Override
     public void onDeletePost(Post post) {
-        mDatabaseHelper.destroyData(post);
+        mPostHelper.destroyData(post);
+        refreshList();
+        String mDeleteMessage = "post: " + post.getBody() + " delete!";
+        showToast(mDeleteMessage);
+    }
+
+    private void showAlertDialog(
+            final Boolean isUpdate,
+            final Post post
+    ) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+        final EditText mInputBody = new EditText(MainActivity.this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        lp.setMargins(20, 0, 20, 0);
+        mInputBody.setLayoutParams(lp);
+
+        alertDialog.setTitle((isUpdate) ? "Update post" : "Create new post");
+
+        if (isUpdate) mInputBody.setText(post.getBody());
+
+        alertDialog.setView(mInputBody);
+        alertDialog.setPositiveButton((isUpdate) ? "UPDATE" : "CREATE",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String mBody = mInputBody.getText().toString();
+
+                        if (isUpdate) {
+                            mPostHelper.updateData(post.getId(), mBody);
+                        } else {
+                            mPostHelper.storeData(mBody);
+                        }
+
+                        refreshList();
+
+                        String mStoreMessage = "new post created with body: ";
+                        String mUpdateMessage = "update post";
+                        showToast((isUpdate) ? mUpdateMessage : mStoreMessage);
+                    }
+                });
+
+        alertDialog.setNegativeButton("CANCEL",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialog.show();
+    }
+
+    private void refreshList() {
         mAdapter.clearData();
-        mAdapter.recreateData(mDatabaseHelper.getPosts());
+        mAdapter.recreateData(mPostHelper.getPosts());
+    }
+
+    private void showToast(String message) {
         Toast.makeText(
                 this,
-                "post: " + post.getBody() + " delete!",
+                message,
                 Toast.LENGTH_SHORT
         ).show();
-    }
-
-    private void alertDialogNewAction() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-        final EditText mInputBody = new EditText(MainActivity.this);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        lp.setMargins(20, 0, 20, 0);
-        mInputBody.setLayoutParams(lp);
-        alertDialog.setTitle("Create new post");
-        alertDialog.setView(mInputBody);
-
-        alertDialog.setPositiveButton("CREATE",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        String mBody = mInputBody.getText().toString();
-                        mDatabaseHelper.storeData(mBody);
-                        mAdapter.clearData();
-                        mAdapter.recreateData(mDatabaseHelper.getPosts());
-                        Toast.makeText(
-                                getApplicationContext(),
-                                "new post created with body: " + mBody,
-                                Toast.LENGTH_SHORT
-                        ).show();
-                    }
-                });
-
-        alertDialog.setNegativeButton("NO",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-
-        alertDialog.show();
-    }
-
-    private void alertDialogUpdateAction(final Post post) {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-        final EditText mInputBody = new EditText(MainActivity.this);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        lp.setMargins(20, 0, 20, 0);
-        mInputBody.setLayoutParams(lp);
-        alertDialog.setTitle("Update post");
-        alertDialog.setView(mInputBody);
-        mInputBody.setText(post.getBody());
-
-        alertDialog.setPositiveButton("UPDATE",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        String mBody = mInputBody.getText().toString();
-                        mDatabaseHelper.updateData(post.getId(), mBody);
-                        mAdapter.clearData();
-                        mAdapter.recreateData(mDatabaseHelper.getPosts());
-                        Toast.makeText(
-                                getApplicationContext(),
-                                "update post: " + mBody,
-                                Toast.LENGTH_SHORT
-                        ).show();
-                    }
-                });
-
-        alertDialog.setNegativeButton("NO",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-
-        alertDialog.show();
     }
 
 }

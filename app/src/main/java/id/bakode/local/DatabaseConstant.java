@@ -25,7 +25,7 @@ class DatabaseConstant {
      static final String SQL_QUERY_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
-     static final String SQL_QUERY_SELECT_QUERY = "SELECT  * FROM " + TABLE_NAME + " ORDER BY " +
+     static final String SQL_QUERY_SELECT_TABLE = "SELECT  * FROM " + TABLE_NAME + " ORDER BY " +
             COLUMN_NAME_ID+ " DESC";
 
 }

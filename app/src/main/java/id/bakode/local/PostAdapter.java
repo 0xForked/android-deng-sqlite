@@ -3,9 +3,6 @@ package id.bakode.local;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,7 +15,7 @@ import java.util.ArrayList;
  * https://aasumitro.id
  */
 public class PostAdapter extends
-        RecyclerView.Adapter<PostAdapter.PostViewHolder> {
+        RecyclerView.Adapter<PostViewHolder> {
 
     private ArrayList<Post> mPosts;
     private PostListener mListener;
@@ -50,21 +47,9 @@ public class PostAdapter extends
     @Override
     public void onBindViewHolder(
             @NonNull PostViewHolder holder,
-            final int position
+            int position
     ) {
-        holder.mPostBody.setText(mPosts.get(position).getBody());
-        holder.mPostContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.onClickPost(mPosts.get(position));
-            }
-        });
-        holder.mDeletePost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.onDeletePost(mPosts.get(position));
-            }
-        });
+        holder.onBind(mPosts.get(position), mListener);
     }
 
     @Override
@@ -80,24 +65,6 @@ public class PostAdapter extends
     void recreateData(ArrayList<Post> posts) {
         this.mPosts.addAll(0, posts);
         notifyDataSetChanged();
-    }
-
-    class PostViewHolder extends
-            RecyclerView.ViewHolder {
-        private TextView mPostBody;
-        private LinearLayout mPostContainer;
-        private ImageButton mDeletePost;
-        PostViewHolder(View itemView) {
-            super(itemView);
-            mPostContainer = itemView.findViewById(R.id.post_container);
-            mPostBody = itemView.findViewById(R.id.post_body);
-            mDeletePost = itemView.findViewById(R.id.post_delete);
-        }
-    }
-
-    interface PostListener {
-        void onClickPost(Post post);
-        void onDeletePost(Post post);
     }
 
 }
