@@ -47,7 +47,7 @@ public class MainActivity extends
     }
 
     private void initRecyclerView() {
-        mAdapter = new PostAdapter(mPostHelper.getPosts(), this);
+        mAdapter = new PostAdapter(mPostHelper.fetchData(), this);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setHasFixedSize(true);
@@ -118,7 +118,7 @@ public class MainActivity extends
 
     private void refreshList() {
         mAdapter.clearData();
-        mAdapter.recreateData(mPostHelper.getPosts());
+        mAdapter.recreateData(mPostHelper.fetchData());
     }
 
     private void showToast(String message) {

@@ -41,24 +41,28 @@ class PostHelper {
         mDatabase.close();
     }
 
-    ArrayList<Post> getPosts() {
-        ArrayList<Post> mPostData = new ArrayList<>();
-        mDatabase = mDatabaseHelper.getWritableDatabase();
+    ArrayList<Post> fetchData() {
+        mDatabase = mDatabaseHelper.getReadableDatabase();
         @SuppressLint("Recycle")
         Cursor mCursor = mDatabase.rawQuery(SQL_QUERY_SELECT_TABLE, null);
+        ArrayList<Post> mPostsData = new ArrayList<>();
         try {
             if (mCursor.moveToFirst()) {
                 do {
+                    int id = mCursor.getInt(mCursor.getColumnIndex(COLUMN_NAME_ID));
+                    String body = mCursor.getString(mCursor.getColumnIndex(COLUMN_NAME_BODY));
+
                     Post post = new Post();
-                    post.setId(mCursor.getInt(mCursor.getColumnIndex(COLUMN_NAME_ID)));
-                    post.setBody(mCursor.getString(mCursor.getColumnIndex(COLUMN_NAME_BODY)));
-                    mPostData.add(post);
+                    post.setId(id);
+                    post.setBody(body);
+
+                    mPostsData.add(post);
                 } while (mCursor.moveToNext());
             }
         } finally {
             mDatabase.close();
         }
-        return mPostData;
+        return mPostsData;
     }
 
     void updateData(int id, String body) {
@@ -66,11 +70,12 @@ class PostHelper {
         mContentValue = new ContentValues();
         mContentValue.put(COLUMN_NAME_BODY, body);
         try {
+            String[] mWhereArgs = new String[]{String.valueOf(id)};
             mDatabase.update(
                     TABLE_NAME,
                     mContentValue,
                     COLUMN_NAME_ID + "= ?",
-                    new String[]{String.valueOf(id)}
+                    mWhereArgs
             );
         } catch (SQLiteException e) {
             e.printStackTrace();
@@ -81,10 +86,11 @@ class PostHelper {
     void destroyData(Post post) {
         mDatabase = mDatabaseHelper.getWritableDatabase();
         try {
+            String[] mWhereArgs = new String[]{String.valueOf(post.getId())};
             mDatabase.delete(
                     TABLE_NAME,
                     COLUMN_NAME_ID + " = ?",
-                    new String[]{String.valueOf(post.getId())}
+                    mWhereArgs
             );
         } catch (SQLiteException e) {
             e.printStackTrace();
